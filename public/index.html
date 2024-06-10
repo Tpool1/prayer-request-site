@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayer Requests</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Submit a Prayer Request</h1>
+    <form id="prayer-form">
+        <input type="text" id="name" name="name" placeholder="Your Name" required>
+        <input type="email" id="email" name="email" placeholder="Your Email" required>
+        <textarea id="request" name="request" placeholder="Your Prayer Request" required></textarea>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Prayer Requests</h2>
+    <div id="prayer-requests"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
