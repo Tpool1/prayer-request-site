@@ -1,57 +1,43 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 const app = express();
 const port = 3000;
 
-// Replace the following with your MongoDB connection string
-require('dotenv').config();
-const uri = process.env.MONGODB_URI;
-
-let db, prayerRequestsCollection;
+const mongoURI = process.env.MONGODB_URI
 
 // Connect to MongoDB
-MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(client => {
-        db = client.db('prayerRequestsDB'); // Database name
-        prayerRequestsCollection = db.collection('prayerRequests'); // Collection name
-        console.log('Connected to Database');
-    })
-    .catch(error => console.error(error));
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log(err));
+
+// Define a schema and model for prayer requests
+const prayerRequestSchema = new mongoose.Schema({
+    name: String,
+    email: String,
+    request: String,
+    date: { type: Date, default: Date.now }
+});
+
+const PrayerRequest = mongoose.model('PrayerRequest', prayerRequestSchema);
 
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-app.post('/api/prayer-requests', (req, res) => {
+app.post('/api/prayer-requests', async (req, res) => {
     const { name, email, request } = req.body;
     if (name && email && request) {
-        prayerRequestsCollection.insertOne({ name, email, request })
-            .then(result => {
-                res.json({ success: true });
-            })
-            .catch(error => {
-                console.error(error);
-                res.json({ success: false });
-            });
+        const newRequest = new PrayerRequest({ name, email, request });
+        await newRequest.save();
+        res.json({ success: true });
     } else {
         res.json({ success: false });
     }
 });
 
-// Root route
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
-  });
-
-app.get('/api/prayer-requests', (req, res) => {
-    prayerRequestsCollection.find().toArray()
-        .then(results => {
-            res.json({ prayerRequests: results });
-        })
-        .catch(error => {
-            console.error(error);
-            res.json({ prayerRequests: [] });
-        });
+app.get('/api/prayer-requests', async (req, res) => {
+    const prayerRequests = await PrayerRequest.find().sort({ date: -1 });
+    res.json({ prayerRequests });
 });
 
 app.listen(port, () => {
