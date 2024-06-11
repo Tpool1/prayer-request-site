@@ -38,6 +38,11 @@ app.post('/api/prayer-requests', (req, res) => {
     }
 });
 
+// Root route
+app.get('/', (req, res) => {
+    res.send('Hello, World!');
+  });
+
 app.get('/api/prayer-requests', (req, res) => {
     prayerRequestsCollection.find().toArray()
         .then(results => {
